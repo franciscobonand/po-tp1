@@ -18,5 +18,27 @@ def create_VERO(c_T, restr):
 
 def format_FPI(restr):
     id_matrix = np.identity(len(restr))
+    b = np.squeeze(np.asarray(restr[:, restr.shape[1] - 1]))
+    wout_b = np.delete(restr, restr.shape[1]-1, 1)
     # adds loose variables before 'b' column
-    return np.insert(restr, [len(restr)], id_matrix, axis=1)
+    # fpi = np.insert(id_matrix, [len(wout_b)], wout_b, axis=1)
+    fpi = np.append(wout_b, id_matrix, axis=1)
+    return np.c_[fpi, b]
+
+
+def check_and_resolve_negative_b(vero):
+    b = np.squeeze(np.asarray(vero[1:, vero.shape[1] - 1]))
+    for i in range(0, len(b)):
+        if b[i] < 0:
+            vero[i+1] = np.negative(vero[i+1])
+
+
+def create_aux_lp(restr):
+    id_matrix = np.identity(restr.shape[0])
+    head = np.append([0] * (restr.shape[1] - 1), [-1] * (restr.shape[0]))
+    head = np.append(head, [0])
+    b = np.squeeze(np.asarray(restr[:, restr.shape[1] - 1]))
+    wout_b = np.delete(restr, restr.shape[1]-1, 1)
+    fpi = np.append(wout_b, id_matrix, axis=1)
+    fpi = np.c_[fpi, b]
+    return np.insert(fpi, 0, head, axis=0)
