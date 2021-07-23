@@ -37,8 +37,34 @@ def create_aux_lp(restr):
     id_matrix = np.identity(restr.shape[0])
     head = np.append([0] * (restr.shape[1] - 1), [-1] * (restr.shape[0]))
     head = np.append(head, [0])
+    head = np.append([0]*restr.shape[0], head)
     b = np.squeeze(np.asarray(restr[:, restr.shape[1] - 1]))
     wout_b = np.delete(restr, restr.shape[1]-1, 1)
     fpi = np.append(wout_b, id_matrix, axis=1)
+    fpi = np.append(id_matrix, fpi, axis=1)
     fpi = np.c_[fpi, b]
     return np.insert(fpi, 0, head, axis=0)
+
+# returns string, optimal value, xi_bi, certificate(aux tableax)
+
+
+def simplex_aux_lp(n_restr, vero):
+    def wout_aux_table():
+        return vero[:, n_restr:]
+
+    while True:
+        if (wout_aux_table()[0, :-1] <= 0).all():
+            if wout_aux_table()[0, -1] == 0:
+                return viable_base(wout_aux_table())
+    # TODO: add inviability check
+    # TODO: see if LP Aux defines if main LP is unlimited
+
+
+def viable_base(n_restr, tabl):
+    base = [0] * tabl.shape[1] - 1
+    for i in range(0, tabl.shape[1]-1):
+        col_T = np.squeeze(tabl[:, i])
+        if np.count_nonzero(col_T) == 1 and len(np.where(col_T == 1)[1]) > 0:
+            base[np.where(col_T == 1)[1]] = tabl[:, -
+                                                 1][np.where(col_T == 1)[1]]
+    return base[:n_restr]

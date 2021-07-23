@@ -17,12 +17,13 @@ except:
     sys.exit(1)
 
 vero = utils.create_VERO(c_T, restrictions)
-auxT_end = len(restrictions) - 1
-tab_init = len(restrictions)
-tab_end = np.size(vero, 1) - 2
-b = np.size(vero, 1) - 1
-print("\n", vero)
+# auxT_end = len(restrictions) - 1
+# tab_init = len(restrictions)
+# tab_end = np.size(vero, 1) - 2
+# b = np.size(vero, 1) - 1
 utils.check_and_resolve_negative_b(vero)
 
 aux_lp = utils.create_aux_lp(restrictions)
-print("\n", aux_lp)
+utils.check_and_resolve_negative_b(aux_lp)
+
+utils.simplex_aux_lp(matrix_size[0], aux_lp)
