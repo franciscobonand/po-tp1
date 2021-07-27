@@ -27,10 +27,9 @@ tabl = utils.return_vero_wout_auxtable(vero, n_restr)
 
 # total_vars represents the inputed variables + loose variables
 total_vars = n_vars + n_restr
-valid_base = utils.get_base(tabl, n_restr, total_vars)
 
 result, opt_val, opt_base, cert = utils.solver(
-    vero, n_restr, total_vars, total_vars, valid_base)
+    vero, n_restr, total_vars, total_vars)
 
 print(result)
 
