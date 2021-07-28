@@ -37,11 +37,8 @@ def solver(vero, n_restr, n_vars, n_costs):
             for num in range(0, n_vars):
                 if num not in b:
                     col = lp_aux[:, num + n_restr]
-                    # print(col)
                     index = np.arange(len(col))[col > 0]
-                    # print(index)
                     if len(index) > 0:
-                        # print("chegay")
                         b[inval_b] = num
                         pivot(lp_aux, num + n_restr, index[0])
                         break
