@@ -31,7 +31,20 @@ def solver(vero, n_restr, n_vars, n_costs):
     if opt_val is not None and np.round(opt_val, 7) < 0:
         return "inviavel", None, None, cert
 
-    # TODO: check if b is valid -> if it doesnt contain a loose variable of ld aux as base
+    # checks if b doesnt contain a loose variable of ld aux as base, and. if so, pivots it
+    if not (b < n_vars).all():
+        for inval_b in np.arange(len(b))[b >= n_vars]:
+            for num in range(0, n_vars):
+                if num not in b:
+                    col = lp_aux[:, num + n_restr]
+                    # print(col)
+                    index = np.arange(len(col))[col > 0]
+                    # print(index)
+                    if len(index) > 0:
+                        # print("chegay")
+                        b[inval_b] = num
+                        pivot(lp_aux, num + n_restr, index[0])
+                        break
 
     tabl = return_vero_wout_auxtable(vero, n_restr)
     # updates vero table with bases extracted from solving auxiliar lp
@@ -40,8 +53,8 @@ def solver(vero, n_restr, n_vars, n_costs):
     vero[:, -1] = lp_aux[:, -1]
 
     for i in b:
-        pivot(vero, i + n_restr, np.arange(n_restr)
-              [vero[1:,  n_restr + i] != 0][0] + 1)
+        pivot(vero, i + n_restr,
+              np.arange(n_restr)[vero[1:,  n_restr + i] != 0][0] + 1)
 
     return simplex(vero, n_restr, n_vars, n_costs, b)[:-2]
 
@@ -58,8 +71,7 @@ def simplex(vero, n_restr, n_vars, n_costs, b):
         # checks if all elements of selected row are negative
         if (tabl[1:, nxt_base_candidate] <= 0).all():
             cert = np.zeros(n_vars)
-            cert[b[b < n_vars]] = tabl[1:, nxt_base_candidate]
-            cert *= -1
+            cert[b[b < n_vars]] = -tabl[1:, nxt_base_candidate]
             cert[nxt_base_candidate] = 1
             return "ilimitada", None,  optim_base(tabl, n_vars, b), cert[:n_vars], vero, b
 
@@ -78,11 +90,9 @@ def simplex(vero, n_restr, n_vars, n_costs, b):
 def pivot(tabl, col, row):
     tabl[row] /= tabl[row, col]
 
-    tabl[:row] -= (tabl[:row, col] / tabl[row, col]
-                   )[:, np.newaxis] * tabl[row, ]
-
-    tabl[row + 1:] -= (tabl[row + 1:, col] / tabl[row, col]
-                       )[:, np.newaxis] * tabl[row, ]
+    for r in range(0, tabl.shape[0]):
+        if r != row:
+            tabl[r] -= tabl[r, col] * tabl[row]
 
 
 def optim_base(tableaux, n_vars, b):
